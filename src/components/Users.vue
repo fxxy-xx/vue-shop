@@ -38,7 +38,7 @@
                             <el-button @click="showEditDialog(scope.row.id)" type="primary" icon="el-icon-edit" size="mini"></el-button>
                             <el-button @click="removeUserById(scope.row.id)" type="danger" icon="el-icon-delete" size="mini"></el-button>
                             <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-                                <el-button type="warning" icon="el-icon-setting" size="mini" ></el-button>
+                                <el-button @click="showSetRole(scope.row)"  type="warning" icon="el-icon-setting" size="mini" ></el-button>
                             </el-tooltip>                            
                         </el-row>
                     </template>
@@ -95,11 +95,27 @@
                 <el-button type="primary" @click="editUserInfo">确 定</el-button>
             </div>
         </el-dialog>
-        <!-- 删除用户对话框 -->
-        
-       
-
-
+        <!-- 修改用户权限对话框 -->
+        <el-dialog title="修改权限" :visible.sync="setRoleDialogVisible">
+            <el-form>
+               <div>
+                   <p>当前用户名：{{setRoleForm.username}}</p>
+                    <p>当前角色：{{setRoleForm.role_name}}</p>
+                    <p>
+                        分配角色
+                        <el-select v-model="roleId" placeholder="请选择">
+                            <el-option v-for="item in roleList"  :key="item.id" :label="item.roleName"  :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </p>
+               </div>
+            </el-form>
+            
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="setRoleId">确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -171,6 +187,11 @@ export default {
             editDialogVisible:false,
             //查询道德用户信息对象
             editForm:{},
+            setRoleDialogVisible:false,
+            setRoleForm:[],
+            roleList:[],
+            roleId:''
+
      
         }
     },
@@ -269,7 +290,7 @@ export default {
         //根据ID删除对应的用户
         async removeUserById(id){
             //弹框询问客户是否删除
-        const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+            const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning'
@@ -285,7 +306,36 @@ export default {
             this.getUserList();
         
 
+        },
+        async showSetRole(user){
+            
+            this.setRoleForm = user;
+            const {data:res} = await this.$http.get('roles');
+            if(res.meta.status !== 200) return this.$message.error("获取权限列表失败");
+
+            this.roleList = res.data;
+
+            console.log(this.roleList)
+
+            this.setRoleDialogVisible = true
+        },
+        async setRoleId(){
+
+            //setRoleId 角色ID
+            //setRoleForm  当前用户的详细信息
+            //console.log(this.roleId)
+
+            const {data:res} = await this.$http.put(`users/${this.setRoleForm.id}/role`,{rid:this.roleId});
+            //console.log(res);
+            if(res.meta.status !== 200) return this.$message.error(res.meta.msg);
+
+            this.$message.success(res.meta.msg);
+            this.setRoleDialogVisible = false;
+            this.getUserList();
+
+
         }
+        
 
   
 

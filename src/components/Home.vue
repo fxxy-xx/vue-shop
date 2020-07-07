@@ -4,7 +4,7 @@
         <el-header>
             <div>
                 <img src="../assets/logo.png" alt="">
-                <span>后台管理系统</span>
+                <span></span>
             </div>
             <el-button type="info" @click="logout" class="logout">登出</el-button>
         </el-header>
