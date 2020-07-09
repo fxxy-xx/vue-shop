@@ -3,17 +3,29 @@ import App from './App.vue'
 import router from './router'
 import './plugins/element.js'
 import './assets/css/global.css'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 
 import axios from 'axios'
 import TreeTable from 'vue-table-with-tree-grid'
+import nProgress from 'nprogress'
 
 Vue.config.productionTip = false
 
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
+//在request拦截器中，展示进度条
+
 axios.interceptors.request.use(config =>{
   
   config.headers.Authorization = window.sessionStorage.getItem('token');
   //console.log(config);
+  NProgress.start()
+  return config;
+})
+
+//在response拦截器中隐藏进度条
+axios.interceptors.request.use(config =>{
+  NProgress.done()
   return config;
 })
 
